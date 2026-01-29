@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --risk-low: #22c55e;
+  --risk-moderate: #eab308;
+  --risk-high: #f97316;
+  --risk-critical: #ef4444;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.risk-low { color: var(--risk-low); }
+.risk-moderate { color: var(--risk-moderate); }
+.risk-high { color: var(--risk-high); }
+.risk-critical { color: var(--risk-critical); }
+
+.bg-risk-low { background-color: var(--risk-low); }
+.bg-risk-moderate { background-color: var(--risk-moderate); }
+.bg-risk-high { background-color: var(--risk-high); }
+.bg-risk-critical { background-color: var(--risk-critical); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+/* Animations */
+@keyframes pulse-risk {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.pulse-risk { animation: pulse-risk 2s infinite; }
+
+/* Card styles */
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 16px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #334155;
+}
