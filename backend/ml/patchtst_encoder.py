@@ -25,7 +25,7 @@ class PatchTSTEncoderModel(nn.Module):
         d_model: int = 64,       # Model dimension
         n_heads: int = 4,        # Attention heads
         n_layers: int = 2,       # Transformer layers
-        d_ff: int = 128,         # Feed-forward dimension
+        d_ff: int = 256,         # Feed-forward dimension
         dropout: float = 0.1,
         embed_dim: int = 32      # Output embedding dimension
     ):
@@ -142,14 +142,14 @@ class PatchTSTEncoder:
                 self.model.load_state_dict(state_dict, strict=False)
                 self.model.to(self.device)
                 self.model.eval()
-                print(f"✅ PatchTST encoder loaded from {model_path}")
+                print(f"[+] PatchTST encoder loaded from {model_path}")
             else:
-                print(f"⚠️ Model not found at {model_path}, using random initialization")
+                print(f"[!] Model not found at {model_path}, using random initialization")
                 self.model = PatchTSTEncoderModel()
                 self.model.to(self.device)
                 self.model.eval()
         except Exception as e:
-            print(f"⚠️ Error loading PatchTST model: {e}, using random initialization")
+            print(f"[!] Error loading PatchTST model: {e}, using random initialization")
             self.model = PatchTSTEncoderModel()
             self.model.to(self.device)
             self.model.eval()

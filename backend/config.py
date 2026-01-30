@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o"
     
     # ML Model paths
-    MODEL_DIR: str = r"c:\Users\Tharun\OneDrive\Desktop\fa\eka_care_models"
+    MODEL_DIR: str = r"D:\Desktop\fianl\ekathon-flexi\eka_care_models"
     PATCHTST_MODEL: str = "patchtst_encoder.pt"
     XGBOOST_CLASSIFIER: str = "xgboost_model.json"
     XGBOOST_REGRESSOR: str = "xgboost_regressor.json"

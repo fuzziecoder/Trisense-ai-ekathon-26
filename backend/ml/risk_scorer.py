@@ -44,29 +44,29 @@ class RiskScorer:
                     meta = json.load(f)
                     self.feature_importance = meta.get('feature_importance', {})
         except Exception as e:
-            print(f"⚠️ Error loading feature schema: {e}")
+            print(f"[!] Error loading feature schema: {e}")
         
         # Load classifier
         try:
             if os.path.exists(classifier_path):
                 self.classifier = xgb.Booster()
                 self.classifier.load_model(classifier_path)
-                print(f"✅ XGBoost classifier loaded from {classifier_path}")
+                print(f"[+] XGBoost classifier loaded from {classifier_path}")
             else:
-                print(f"⚠️ Classifier not found at {classifier_path}")
+                print(f"[!] Classifier not found at {classifier_path}")
         except Exception as e:
-            print(f"⚠️ Error loading classifier: {e}")
+            print(f"[!] Error loading classifier: {e}")
         
         # Load regressor
         try:
             if os.path.exists(regressor_path):
                 self.regressor = xgb.Booster()
                 self.regressor.load_model(regressor_path)
-                print(f"✅ XGBoost regressor loaded from {regressor_path}")
+                print(f"[+] XGBoost regressor loaded from {regressor_path}")
             else:
-                print(f"⚠️ Regressor not found at {regressor_path}")
+                print(f"[!] Regressor not found at {regressor_path}")
         except Exception as e:
-            print(f"⚠️ Error loading regressor: {e}")
+            print(f"[!] Error loading regressor: {e}")
     
     def predict(self, features: Dict[str, float]) -> Tuple[float, float]:
         """

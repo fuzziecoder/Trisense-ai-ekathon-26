@@ -75,22 +75,17 @@ class SyntheticDataGenerator:
     
     def _generate_sepsis_stream(self, count: int) -> List[Dict]:
         readings = []
-        sepsis_start = count // 3
+        # Force immediate critical sepsis state
+        # High HR (>180), Low BP (<90), Fever (>38.5), Low SpO2 (<90)
         for i in range(count):
-            if i < sepsis_start:
-                readings.append(self._generate_stable_stream(1)[0])
-            else:
-                progress = (i - sepsis_start) / (count - sepsis_start)
-                hr = 80 + progress * 50 + np.random.normal(0, 5)
-                sbp = 115 - progress * 35 + np.random.normal(0, 6)
-                readings.append({
-                    "heart_rate": min(150, hr),
-                    "systolic_bp": max(75, sbp),
-                    "diastolic_bp": max(45, 70 - progress * 20 + np.random.normal(0, 4)),
-                    "respiratory_rate": min(35, 18 + progress * 15 + np.random.normal(0, 2)),
-                    "spo2": min(100, max(82, 97 - progress * 12 + np.random.normal(0, 2))),
-                    "temperature": 37.0 + progress * 2.5 + np.random.normal(0, 0.3)
-                })
+            readings.append({
+                "heart_rate": 185 + np.random.normal(0, 5),
+                "systolic_bp": 85 + np.random.normal(0, 4),
+                "diastolic_bp": 45 + np.random.normal(0, 3),
+                "respiratory_rate": 35 + np.random.normal(0, 2),
+                "spo2": 88 + np.random.normal(0, 2),
+                "temperature": 39.5 + np.random.normal(0, 0.2)
+            })
         return readings
     
     def get_next_reading(self, patient_id: str) -> Optional[Dict]:
@@ -130,3 +125,16 @@ def get_generator() -> SyntheticDataGenerator:
     if _generator is None:
         _generator = SyntheticDataGenerator()
     return _generator
+
+if __name__ == "__main__":
+    print("Test run of SyntheticDataGenerator...")
+    gen = SyntheticDataGenerator()
+    patients = gen.get_all_patients()
+    print(f"Loaded {len(patients)} patients:")
+    for p in patients:
+        print(f" - {p['name']} ({p['pattern']})")
+    
+    print("\nGenerating sample stream for PAT-002 (Deteriorating)...")
+    for _ in range(5):
+        data = gen.get_next_reading("PAT-002")
+        print(f"Time: {data['timestamp'].strftime('%H:%M:%S')} | HR: {data['vitals']['heart_rate']:.1f} | SpO2: {data['vitals']['spo2']:.1f}")

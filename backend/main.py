@@ -21,20 +21,20 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    print("🚀 TriSense AI Starting (Lifespan)...")
+    print("[*] TriSense AI Starting (Lifespan)...")
     try:
         patients = get_generator().get_all_patients()
-        print(f"📊 Demo patients: {len(patients)}")
+        print(f"[*] Demo patients: {len(patients)}")
         asyncio.create_task(continuous_data_stream())
     except Exception as e:
-        print(f"❌ Startup Error: {e}")
+        print(f"[!] Startup Error: {e}")
         import traceback
         traceback.print_exc()
     
     yield
     
     # Shutdown
-    print("🛑 Shutting down...")
+    print("[*] Shutting down...")
     global is_streaming
     is_streaming = False
 
@@ -63,7 +63,7 @@ is_streaming = False
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     active_connections.append(websocket)
-    print(f"📱 Client connected. Total: {len(active_connections)}")
+    print(f"[+] Client connected. Total: {len(active_connections)}")
     
     try:
         while True:
@@ -74,7 +74,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_json({"type": "subscribed", "status": "ok"})
     except WebSocketDisconnect:
         active_connections.remove(websocket)
-        print(f"📱 Client disconnected. Total: {len(active_connections)}")
+        print(f"[-] Client disconnected. Total: {len(active_connections)}")
 
 
 async def broadcast_update(data: dict):
@@ -84,7 +84,7 @@ async def broadcast_update(data: dict):
         try:
             await conn.send_text(message)
         except Exception as e:
-            print(f"⚠️ Broadcast error: {e}")
+            print(f"[!] Broadcast error: {e}")
             pass
 
 
@@ -94,7 +94,7 @@ async def continuous_data_stream():
     generator = get_generator()
     coordinator = get_coordinator()
     
-    print("🔄 Starting continuous data stream...")
+    print("[*] Starting continuous data stream...")
     
     while is_streaming:
         try:
@@ -117,7 +117,7 @@ async def continuous_data_stream():
             
             await asyncio.sleep(2)  # Update every 2 seconds
         except Exception as e:
-            print(f"❌ Error in data stream: {e}")
+            print(f"[!] Error in data stream: {e}")
             import traceback
             traceback.print_exc()
             await asyncio.sleep(2)

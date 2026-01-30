@@ -29,12 +29,12 @@ class ClinicalReasoningAgent:
                     base_url=settings.NVIDIA_BASE_URL,
                     api_key=settings.NVIDIA_API_KEY
                 )
-                print(f"✅ NVIDIA client initialized with model {settings.NVIDIA_MODEL}")
+                print(f"[+] NVIDIA client initialized with model {settings.NVIDIA_MODEL}")
             except Exception as e:
-                print(f"⚠️ Failed to initialize NVIDIA client: {e}")
+                print(f"[!] Failed to initialize NVIDIA client: {e}")
                 self.client = None
         else:
-            print("ℹ️ NVIDIA API key not set, using rule-based reasoning")
+            print("[i] NVIDIA API key not set, using rule-based reasoning")
     
     def risk_bucket(self, score: float) -> str:
         """Categorize risk score (Deterministic, outside LLM)"""

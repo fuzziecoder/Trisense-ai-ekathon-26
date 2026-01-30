@@ -19,12 +19,12 @@ class SupabaseClient:
         """Get or create Supabase client"""
         if cls._client is None:
             if settings.SUPABASE_URL.startswith("YOUR_"):
-                print("⚠️ Supabase not configured - running in demo mode")
+                print("[!] Supabase not configured - running in demo mode")
                 return None
             try:
                 cls._client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
             except Exception as e:
-                print(f"⚠️ Failed to connect to Supabase: {e}")
+                print(f"[!] Failed to connect to Supabase: {e}")
                 return None
         return cls._client
     
