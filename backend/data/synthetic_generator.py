@@ -20,14 +20,14 @@ class SyntheticDataGenerator:
     def _create_demo_patients(self) -> List[Dict]:
         return [
             {"patient_id": "PAT-001", "name": "Marisse Meeus", 
-             "age_days": 95, "gestational_age": "34 Weeks, 6 Days",
-             "birth_weight": "750g", "ward": "NICU-3", "pattern": "stable"},
+             "patient_age": "45 Years", "admitted_ward": "General Ward A",
+             "nurse_id": "NUR-75", "ward": "General-A", "pattern": "stable"},
             {"patient_id": "PAT-002", "name": "James Chen",
-             "age_days": 42, "gestational_age": "32 Weeks, 2 Days",
-             "birth_weight": "1200g", "ward": "NICU-2", "pattern": "deteriorating"},
+             "patient_age": "28 Years", "admitted_ward": "ICU-3",
+             "nurse_id": "NUR-42", "ward": "ICU", "pattern": "deteriorating"},
             {"patient_id": "PAT-003", "name": "Sarah Johnson",
-             "age_days": 28, "gestational_age": "36 Weeks, 0 Days",
-             "birth_weight": "2100g", "ward": "NICU-1", "pattern": "sepsis"},
+             "patient_age": "62 Years", "admitted_ward": "Emergency B",
+             "nurse_id": "NUR-12", "ward": "Emergency", "pattern": "sepsis"},
         ]
     
     def _generate_patient_stream(self, patient: Dict) -> List[Dict]:

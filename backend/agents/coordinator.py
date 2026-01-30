@@ -78,7 +78,7 @@ class AgentCoordinator:
                                                 drift_output, trend_output)
         
         # 5. Get clinical reasoning (STRICT: Based only on ML output)
-        reasoning = self.reasoning_agent.generate_reasoning(ml_output)
+        reasoning = self.reasoning_agent.generate_reasoning(ml_output, features=features)
         
         # 6. Generate suggestions
         suggestions = self.suggestion_agent.generate_suggestions(patterns, consensus_risk)

@@ -1,6 +1,15 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 
+// Helper to format date consistently (avoids hydration mismatch)
+const getFormattedDate = () => {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const year = now.getFullYear();
+    return `${month}/${day}/${year}`;
+};
+
 interface VitalData {
     patient_id: string
     timestamp: string
@@ -20,7 +29,7 @@ interface VitalData {
     reasoning?: { severity: string; primary_concern: string; physiological_interpretation: string }
     alert?: { level: string; message: string }
     feature_importance: Record<string, number>
-    patient_info?: { name: string; gestational_age?: string; birth_weight?: string; age_days?: number }
+    patient_info?: { name: string; patient_age?: string; admitted_ward?: string; nurse_id?: string }
     ml_output?: {
         model_name: string
         task: string
@@ -33,7 +42,13 @@ interface VitalData {
 export default function Dashboard() {
     const [patients, setPatients] = useState<Map<string, VitalData>>(new Map())
     const [selectedPatient, setSelectedPatient] = useState<string | null>(null)
+    const [currentDate, setCurrentDate] = useState<string>('')
     const wsRef = useRef<WebSocket | null>(null)
+
+    // Set date on client-side only to avoid hydration mismatch
+    useEffect(() => {
+        setCurrentDate(getFormattedDate());
+    }, []);
 
     useEffect(() => {
         let ws: WebSocket | null = null;
@@ -102,7 +117,7 @@ export default function Dashboard() {
                     <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold border border-blue-100">PROD v1.2</span>
                 </div>
                 <div className="flex items-center gap-6 text-sm font-medium text-gray-500">
-                    <span className="bg-gray-50 px-3 py-1 rounded-lg border border-gray-100">🕒 {new Date().toLocaleDateString()}</span>
+                    <span className="bg-gray-50 px-3 py-1 rounded-lg border border-gray-100" suppressHydrationWarning>🕒 {currentDate}</span>
                     <button className="hover:text-red-500 transition-colors">Logout 🚪</button>
                 </div>
             </header>
@@ -122,16 +137,16 @@ export default function Dashboard() {
                                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Clinical Data</h3>
                                 <div className="space-y-2.5">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-gray-500">Postnatal Age</span>
-                                        <span className="text-sm font-bold text-gray-700">{currentPatient.patient_info.age_days} Days</span>
+                                        <span className="text-sm text-gray-500">Patient Age</span>
+                                        <span className="text-sm font-bold text-gray-700">{currentPatient.patient_info.patient_age}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-gray-500">Gestational Age</span>
-                                        <span className="text-sm font-bold text-gray-700">{currentPatient.patient_info.gestational_age}</span>
+                                        <span className="text-sm text-gray-500">Admitted Ward</span>
+                                        <span className="text-sm font-bold text-gray-700">{currentPatient.patient_info.admitted_ward}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-gray-500">Birth Weight</span>
-                                        <span className="text-sm font-bold text-gray-700">{currentPatient.patient_info.birth_weight}</span>
+                                        <span className="text-sm text-gray-500">Nurse ID</span>
+                                        <span className="text-sm font-bold text-gray-700">{currentPatient.patient_info.nurse_id}</span>
                                     </div>
                                 </div>
                             </div>
@@ -280,7 +295,7 @@ export default function Dashboard() {
                                         <div className="flex items-center gap-4">
                                             <div className="text-center px-4 border-r border-gray-200">
                                                 <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">Confidence</div>
-                                                <div className="text-xl font-black text-gray-800">{(currentPatient?.ml_output?.confidence || 0.91) * 100}%</div>
+                                                <div className="text-xl font-black text-gray-800">{(currentPatient?.ml_output?.confidence || 0.76) * 100}%</div>
                                             </div>
                                             <div className="text-center px-4">
                                                 <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">ML Prediction Time</div>
@@ -289,7 +304,7 @@ export default function Dashboard() {
                                         </div>
                                         <div className="flex gap-1">
                                             {[1, 2, 3, 4, 5].map(i => (
-                                                <div key={i} className={`w-1.5 h-6 rounded-full ${i <= (currentPatient?.ml_output?.confidence || 0.9) * 5 ? 'bg-blue-500' : 'bg-gray-200'}`} />
+                                                <div key={i} className={`w-1.5 h-6 rounded-full ${i <= (currentPatient?.ml_output?.confidence || 0.76) * 5 ? 'bg-blue-500' : 'bg-gray-200'}`} />
                                             ))}
                                         </div>
                                     </div>

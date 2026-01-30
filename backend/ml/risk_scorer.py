@@ -120,7 +120,7 @@ class RiskScorer:
         
         # Confidence logic: if model is available, use high confidence
         # In a real scenario, this might come from the model's internal metrics
-        confidence = 0.91 if self.regressor else 0.70
+        confidence = 0.76 if self.regressor else 0.70
         
         return {
             "model_name": "PatchTST-XGBoost-Hybrid",

@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "YOUR_SUPABASE_ANON_KEY")
     
     # NVIDIA API settings (for Qwen model)
-    NVIDIA_API_KEY: Optional[str] = "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"
+    NVIDIA_API_KEY: Optional[str] = os.getenv("NVIDIA_API_KEY", "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")
     NVIDIA_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
     NVIDIA_MODEL: str = "qwen/qwen3-next-80b-a3b-thinking"
     

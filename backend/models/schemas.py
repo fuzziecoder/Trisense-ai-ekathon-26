@@ -45,10 +45,9 @@ class PatientInfo(BaseModel):
     """Patient demographic information"""
     patient_id: str
     name: str
-    age: Optional[int] = None
-    gestational_age: Optional[str] = None  # For neonatal patients
-    birth_weight: Optional[str] = None
-    ward: Optional[str] = None
+    patient_age: Optional[str] = None
+    admitted_ward: Optional[str] = None
+    nurse_id: Optional[str] = None
     admission_time: Optional[datetime] = None
 
 

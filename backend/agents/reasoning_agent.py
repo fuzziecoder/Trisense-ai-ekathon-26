@@ -54,17 +54,108 @@ class ClinicalReasoningAgent:
     ) -> ClinicalReasoning:
         """
         Generate clinical reasoning based ONLY on ML output.
+        For MODERATE risk, calls LLM for suggestions.
         """
         risk_score = ml_output.get("risk_score", 0.0)
         confidence = ml_output.get("confidence", 0.0)
+        risk_category = self.risk_bucket(risk_score)
         
-        if self.client:
+        # For MODERATE risk, get AI suggestions
+        if risk_category == "Moderate" and self.client:
             try:
-                return self._llm_reasoning(ml_output)
+                return self._get_moderate_suggestions(ml_output, features)
             except Exception as e:
-                print(f"LLM reasoning failed: {e}, falling back to rules")
+                print(f"LLM suggestion failed: {e}, falling back to rules")
         
         return self._rule_based_reasoning(risk_score, confidence)
+    
+    def _get_moderate_suggestions(self, ml_output: Dict[str, Any], features: Dict[str, float] = None) -> ClinicalReasoning:
+        """Generate AI-powered suggestions for MODERATE risk situations"""
+        
+        risk_score = ml_output.get("risk_score", 0.0)
+        
+        # Build context about current vitals if available
+        vitals_context = ""
+        if features:
+            vitals_context = f"""
+Current vital signs:
+- Heart Rate: {features.get('heart_rate_latest', 'N/A')} bpm
+- SpO2: {features.get('spo2_latest', 'N/A')}%
+- Respiratory Rate: {features.get('respiratory_rate_latest', 'N/A')} /min
+- Systolic BP: {features.get('systolic_bp_latest', 'N/A')} mmHg
+- Temperature: {features.get('temperature_latest', 'N/A')} °C
+"""
+        
+        system_prompt = """
+You are a clinical monitoring assistant.
+
+Context:
+The patient has a MODERATE risk score for sepsis based on a machine learning model.
+
+Your role:
+Provide brief, actionable monitoring guidance to help clinical staff observe for potential clinical deterioration related to sepsis.
+
+Strict rules:
+1. Do NOT diagnose, confirm, or rule out sepsis or any infection
+2. Do NOT recommend treatments, medications, fluids, or antibiotics
+3. ONLY suggest monitoring, observation, and reassessment actions
+4. Limit output to a maximum of 3–4 bullet points
+5. Use concise, neutral, and technical clinical language
+
+Output format:
+- Begin with a short technical explanation (1–2 sentences) describing the need for closer observation at a moderate sepsis risk level
+- Follow with 3–4 bullet points listing specific parameters or signs that should be monitored or trended
+"""
+
+        user_content = f"""The ML model has flagged this patient with a MODERATE risk score of {risk_score:.2f}.
+{vitals_context}
+Please provide monitoring suggestions for the clinical staff."""
+
+        print(f"[DEBUG] Calling NVIDIA API for moderate risk suggestions...")
+        print(f"[DEBUG] Risk score: {risk_score}, Model: {settings.NVIDIA_MODEL}")
+        
+        try:
+            # Note: qwen3-next-80b-a3b-thinking might require specific handling or sometimes the base model is safer
+            # We use the provided model from settings
+            completion = self.client.chat.completions.create(
+                model=settings.NVIDIA_MODEL,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_content}
+                ],
+                temperature=0.6,
+                top_p=0.7,
+                max_tokens=600,
+                stream=False  # Try non-streaming first for better reliability in this env
+            )
+            
+            full_content = completion.choices[0].message.content or ""
+            
+            # If the model has a reasoning/thinking field, some SDKs put it in a separate attribute
+            # For Qwen thinking models, let's try to extract if it exists
+            reasoning_logic = getattr(completion.choices[0].message, "reasoning_content", "")
+            
+            print(f"[DEBUG] API Response length: {len(full_content)} chars")
+            if reasoning_logic:
+                print(f"[DEBUG] Found reasoning content: {len(reasoning_logic)} chars")
+            
+        except Exception as e:
+            print(f"[ERROR] NVIDIA API call failed: {e}")
+            full_content = ""
+        
+        # If we got a response, use it. Otherwise fallback to a structured clinical default.
+        if full_content.strip():
+            final_explanation = full_content
+        else:
+            final_explanation = f"Moderate sepsis risk (Score: {risk_score:.2f}) requiring clinical observation. Model indicates risk based on learned vital sign trends. Please monitor for worsening heart rate or further deterioration in blood pressure."
+
+        return ClinicalReasoning(
+            severity=f"Moderate Risk (Score: {risk_score:.2f})",
+            primary_concern="Elevated risk requiring enhanced monitoring",
+            physiological_interpretation=final_explanation,
+            timeline_estimate="Continue monitoring per protocol",
+            contributing_factors=[f"ML Confidence: {ml_output.get('confidence', 0)*100:.0f}%", "AI-Generated Suggestions"]
+        )
     
     def _llm_reasoning(self, ml_output: Dict[str, Any]) -> ClinicalReasoning:
         """Generate reasoning using NVIDIA Qwen model with strict rules"""
